@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="ee1f9584-f6b7-4170-b87b-27305f9d65f9" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="scattergather-alekhyaFlow" doc:id="68a3019f-9315-4899-804c-c938afffc290" >
+		<http:listener doc:name="scattergather" doc:id="34e8281c-b2d8-4d33-88a8-a28784352eba" config-ref="HTTP_Listener_config" path="/scattergather"/>
+		<set-payload value="#[payload]" doc:name="originalPayload" doc:id="b9f83d62-7452-4a09-90eb-f0da201c2268" />
+		<scatter-gather doc:name="Scatter-Gather" doc:id="4ff306e3-68ff-49ba-a328-47b26f2f134b">
+			<route>
+				<ee:transform doc:name="Transform Message" doc:id="49fb323b-f3f0-4132-a093-0a17597bbb84">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"addition result" : payload.number1 + payload.number2
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</route>
+			<route>
+				<ee:transform doc:name="Transform Message" doc:id="b8c60f5a-47bd-4d79-afa3-614f4af58e3d">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"sub result" : payload.number1 - payload.number2
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</route>
+			<route>
+				<ee:transform doc:name="Transform Message" doc:id="66f6a596-4313-41a4-9c70-90862f491b9a">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"multiplication result" : payload.number1 * payload.number2
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</route>
+		</scatter-gather>
+		<set-payload value="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]" doc:name="aggregator" doc:id="2be0765f-7190-4b30-92c9-6c7974bad612" />
+		<logger level="INFO" doc:name="Logger" doc:id="6c3688df-becc-42d6-9ecb-ae225166b8f0" message="#[payload]"/>
+	</flow>
+	<flow name="scattergather-alekhyaFlow1" doc:id="b32976f2-1b37-439b-8c91-f4f22639243c" >
+		<http:listener doc:name="Listener" doc:id="4ffc5dbe-0305-49f8-ba9f-2bb6f0ba302b" config-ref="HTTP_Listener_config" path="/scattergather2"/>
+		<set-payload value="good morning" doc:name="Set Payload" doc:id="e3890af4-b401-41e7-b662-3322583ef3e1" />
+		<scatter-gather doc:name="Scatter-Gather" doc:id="b6fbb0f0-564b-4e05-a089-53135063de78" >
+			<route >
+				<set-payload value="#[payload ++&quot; &quot;++ 'route1']" doc:name="route1" doc:id="b24408f0-3926-47c0-8a6d-6e601cf6db66" />
+			</route>
+			<route >
+				<set-payload value="#[payload ++&quot; &quot;++ 'route2']" doc:name="route2" doc:id="3cbbdf5a-f7ab-4596-b590-14e274e4f37e" />
+			</route>
+			<route >
+				<set-payload value="#[payload ++&quot; &quot;++ 'route3']" doc:name="route3" doc:id="575d5ec0-5ce5-45b0-9104-78033b47fce4" />
+			</route>
+		</scatter-gather>
+		<set-payload value="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]" doc:name="Set Payload" doc:id="0fbb915a-6371-4ea6-954b-f36e7ffa3193" />
+		<logger level="INFO" doc:name="Logger" doc:id="b9f3366e-973c-49f7-ac7e-5dbe16f90e9e" message="#[payload]"/>
+	</flow>
+</mule>
